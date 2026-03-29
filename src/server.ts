@@ -4,6 +4,7 @@ import { logger } from './utils/logger.js';
 import { launchBrowser, closeBrowser } from './services/browser-pool.js';
 import { startSessionCleanup, stopSessionCleanup, destroyAllSessions } from './services/session-manager.js';
 import { errorHandler } from './middleware/error-handler.js';
+import { authMiddleware } from './middleware/auth.js';
 import { registerHealthRoutes } from './routes/health.js';
 import { registerSessionRoutes } from './routes/sessions.js';
 import { registerNavigateRoutes } from './routes/navigate.js';
@@ -19,6 +20,9 @@ const app = Fastify({
 
 // Global error handler
 app.setErrorHandler(errorHandler);
+
+// Auth middleware (runs before all routes)
+app.addHook('onRequest', authMiddleware);
 
 // Register all routes
 registerHealthRoutes(app);
