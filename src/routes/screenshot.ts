@@ -3,6 +3,30 @@ import { getSessionOrThrow } from '../services/session-manager.js';
 import type { ScreenshotRequest } from '../types/api.js';
 
 export function registerScreenshotRoutes(app: FastifyInstance): void {
+  // Lightweight GET for polling (bot protection flow)
+  app.get<{ Params: { sessionId: string } }>(
+    '/sessions/:sessionId/screenshot',
+    async (request) => {
+      const start = Date.now();
+      const session = getSessionOrThrow(request.params.sessionId);
+
+      const buffer = await session.page.screenshot({ type: 'png', fullPage: false });
+      const viewport = session.page.viewportSize();
+
+      return {
+        success: true,
+        data: {
+          screenshot: buffer.toString('base64'),
+          width: viewport?.width ?? 0,
+          height: viewport?.height ?? 0,
+        },
+        sessionId: session.id,
+        timing: { durationMs: Date.now() - start },
+      };
+    },
+  );
+
+  // Full-featured POST (existing)
   app.post<{ Params: { sessionId: string }; Body: ScreenshotRequest }>(
     '/sessions/:sessionId/screenshot',
     async (request) => {

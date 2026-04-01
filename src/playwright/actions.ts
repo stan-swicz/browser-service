@@ -11,9 +11,15 @@ export async function executeAction(page: Page, req: ActionRequest): Promise<Act
 
   switch (req.action) {
     case 'click': {
-      if (!req.selector) throw new SessionError('VALIDATION_ERROR', 'click requires a selector');
-      await page.click(req.selector, { timeout });
-      performed = `Clicked "${req.selector}"`;
+      if (req.x !== undefined && req.y !== undefined && !req.selector) {
+        await page.mouse.click(req.x, req.y);
+        performed = `Clicked at (${req.x}, ${req.y})`;
+      } else if (req.selector) {
+        await page.click(req.selector, { timeout });
+        performed = `Clicked "${req.selector}"`;
+      } else {
+        throw new SessionError('VALIDATION_ERROR', 'click requires a selector or x/y coordinates');
+      }
       break;
     }
     case 'type': {

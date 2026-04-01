@@ -68,6 +68,8 @@ export type ActionType = 'click' | 'type' | 'select' | 'scroll' | 'wait' | 'pres
 export interface ActionRequest {
   action: ActionType;
   selector?: string;
+  x?: number;
+  y?: number;
   value?: string;
   key?: string;
   direction?: 'up' | 'down';
